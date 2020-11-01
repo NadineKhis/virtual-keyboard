@@ -1,5 +1,14 @@
 let input = document.querySelector('.use-keyboard-input');
 
+let keyPress = light => {
+    light.animate( [
+        { color: 'white', background: 'black' },
+        // { color: 'white', background: 'black' },
+        { color: 'white', background: 'black' }
+    ], {
+        duration: 250
+    })
+}
 const Keyboard = {
     elements: {
         main: null,
@@ -54,10 +63,19 @@ const Keyboard = {
 
             element.addEventListener('click', () => {
                 // Cursor
+                this.properties.direction = 'none';
                 this.properties.start = input.selectionStart;
                 this.properties.end = input.selectionEnd;
             });
-            element.addEventListener('keypress', () => {
+            element.addEventListener('keypress', key => {
+                if (key.which === 13) keyPress(document.querySelector('.enter'));
+                if (key.which === 32) keyPress(document.querySelector('.space'));
+                // TODO: another func keys
+
+
+                for (let light of this.elements.keys) {
+                    if (key.key.toLowerCase() === light.textContent.toLowerCase()) keyPress(light);
+                }
                 // Physical keyboard input
                 this.properties.value += key.key;
                 this.open(element.value, currentValue => {
@@ -72,7 +90,14 @@ const Keyboard = {
                 this.properties.start++;
                 this.properties.end++;
             });
+            // element.addEventListener('keyup', key => {
+            //     // console.log(key)
+            //     let keyPressed = document.ge
+            // })
             element.addEventListener('keydown', key => {
+                // let keyPressed = document.getElementById(key);
+                // console.log(keyPressed)
+                // keyPressed.classList.add('pressed');
                 // Right and left arrows
                 if (key.which === 37) {
                     this.properties.start--;
@@ -86,6 +111,7 @@ const Keyboard = {
                     if (this.properties.start > this.properties.value.length) this.properties.start = this.properties.value.length;
                     if (this.properties.end > this.properties.value.length) this.properties.end = this.properties.value.length;
                 }
+
             })
         });
     },
@@ -124,7 +150,7 @@ const Keyboard = {
 
         keyLayout.forEach(key => {
             const keyElement = document.createElement("button");
-            const insertLineBreak = ["backspace", "p", "enter", "?"].indexOf(key) !== -1;
+            const insertLineBreak = ["backspace", "]", "enter", "ctrl"].indexOf(key) !== -1;
 
             // Add attributes/classes
             keyElement.setAttribute("type", "button");
@@ -150,7 +176,7 @@ const Keyboard = {
                     });
                     break
                 case "tab":
-                    keyElement.classList.add("keyboard__key--wide");
+                    keyElement.classList.add("keyboard__key--wide", "tab");
                     keyElement.innerHTML = createIconHTML('keyboard_tab');
 
                     keyElement.addEventListener("click", () => {
@@ -160,7 +186,7 @@ const Keyboard = {
                     break
 
                 case "backspace":
-                    keyElement.classList.add("keyboard__key--wide");
+                    keyElement.classList.add("keyboard__key--wide", "backspace");
                     keyElement.innerHTML = createIconHTML("backspace");
                     keyElement.addEventListener("click", () => {
                         input.focus();
@@ -190,17 +216,18 @@ const Keyboard = {
                     break;
 
                 case "caps":
-                    keyElement.classList.add("keyboard__key--wide", "keyboard__key--activatable");
+                    keyElement.classList.add("keyboard__key--wide", "keyboard__key--activatable", "caps");
                     keyElement.innerHTML = createIconHTML("keyboard_capslock");
 
                     keyElement.addEventListener("click", () => {
                         this._toggleCapsLock();
                         keyElement.classList.toggle("keyboard__key--active", this.properties.capsLock);
                     });
+
                     break;
 
                 case "enter":
-                    keyElement.classList.add("keyboard__key--wide");
+                    keyElement.classList.add("keyboard__key--wide", "enter");
                     keyElement.innerHTML = createIconHTML("keyboard_return");
                     keyElement.addEventListener("click", () => {
                         //перенос строки
@@ -219,17 +246,20 @@ const Keyboard = {
                         input.focus();
                         input.setSelectionRange(this.properties.start, this.properties.end);
                     });
+                    keyElement.addEventListener('keydown', () => {
+                        keyElement.classList.toggle("keyboard__key--active");
+                    })
                     break;
 
                 case "shift":
                     keyElement.innerHTML = createIconHTML("north");
-                    keyElement.classList.add("keyboard__key--verywide");
+                    keyElement.classList.add("keyboard__key--verywide", "keyboard__key--activatable", "shift");
                     if (this.properties.shift === true) keyElement.classList.toggle("keyboard__key_shift");
 
                     keyElement.addEventListener('click', () => {
                         //change shift
                         this.properties.shift = !this.properties.shift;
-                        keyElement.classList.toggle("keyboard__key_shift");
+                        keyElement.classList.toggle("keyboard__key--active");
                         input.focus();
                         //change case
                         for (let i = 0; i < keyLayout.length; i++) {
@@ -287,7 +317,7 @@ const Keyboard = {
                     break;
 
                 case "space":
-                    keyElement.classList.add("keyboard__key--extra-wide");
+                    keyElement.classList.add("keyboard__key--extra-wide", "space");
                     keyElement.innerHTML = createIconHTML("space_bar");
                     keyElement.addEventListener("click", () => {
                         this.properties.value = this.properties.value.substring(0, this.properties.start)
@@ -422,6 +452,9 @@ const Keyboard = {
                 key.textContent = this.properties.capsLock ? key.textContent.toUpperCase() : key.textContent.toLowerCase();
             }
         }
+    },
+    _toggleShift() {
+        this.properties.shift = !this.properties.shift;
     },
 
     open(initialValue, oninput, onclose) {
