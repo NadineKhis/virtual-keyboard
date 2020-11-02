@@ -1,5 +1,10 @@
 let input = document.querySelector('.use-keyboard-input');
 
+window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+let rec = new SpeechRecognition();
+rec.interimResults = true;
+rec.continuous = true;
+
 let keyPress = light => {
     light.animate( [
         { color: 'white', background: 'black' },
@@ -10,6 +15,15 @@ let keyPress = light => {
     })
 }
 const Keyboard = {
+    speech (event) {
+        const text = Array.from(event.results)
+            .map(result => result[0])
+            .map(result => result.transcript)
+            .join('');
+        if  (event.results[0].isFinal) {
+            input.value = text;
+        }
+    },
     elements: {
         main: null,
         keysContainer: null,
@@ -30,9 +44,8 @@ const Keyboard = {
         end: 0,
         direction: 'none',
         language: true,
-        audio: true,
-        micro: false
-
+        sound: false,
+        record: false
     },
 
     init() {
@@ -89,15 +102,7 @@ const Keyboard = {
                 this.properties.start++;
                 this.properties.end++;
             });
-            // element.addEventListener('keyup', key => {
-            //     // console.log(key)
-            //     let keyPressed = document.ge
-            // })
             element.addEventListener('keydown', key => {
-                // let keyPressed = document.getElementById(key);
-                // console.log(keyPressed)
-                // keyPressed.classList.add('pressed');
-                // Right and left arrows
                 if (key.which === 37) {
                     this.properties.start--;
                     this.properties.end--;
@@ -105,8 +110,8 @@ const Keyboard = {
                     if (this.properties.end < 0) this.properties.end = 0;
                 }
                 if (key.which === 39) {
-                    this.properties.start++
-                    this.properties.end++
+                    this.properties.start++;
+                    this.properties.end++;
                     if (this.properties.start > this.properties.value.length) this.properties.start = this.properties.value.length;
                     if (this.properties.end > this.properties.value.length) this.properties.end = this.properties.value.length;
                 }
@@ -158,15 +163,39 @@ const Keyboard = {
                 case "en":
                     keyElement.innerHTML = "en";
                     keyElement.addEventListener('click', () => {
+                        if (this.properties.sound) {
+                            window.speechSynthesis.speak(new SpeechSynthesisUtterance('русский'));
+                        }
+                        if (this.properties.record) {
+                            document.querySelector('.mic').classList.toggle('keyboard__key_mic');
+                            rec = new SpeechRecognition();
+                            rec.interimResults = true;
+                            rec.continuous = true;
+                            rec.lang = "ru-RU";
+                            rec.addEventListener("result", this.speech);
+                            rec.start();
+                        }
                         this.properties.language = !this.properties.language;
                         while (this.elements.keysContainer.children.length > 0) this.elements.keysContainer.children[0].remove();
                         this.elements.keysContainer.appendChild(this._createKeys());
                         this.elements.keys = this.elements.keysContainer.querySelectorAll(".keyboard__key");
                     });
                     break
+
                 case "ru":
                     keyElement.innerHTML = "ru";
                     keyElement.addEventListener('click', () => {
+                        if (this.properties.sound) {
+                            window.speechSynthesis.speak(new SpeechSynthesisUtterance('english'));
+                        }
+                        if (this.properties.record) {
+                            rec = new SpeechRecognition();
+                            rec.interimResults = true;
+                            rec.continuous = true;
+                            rec.lang = "en-US";
+                            rec.addEventListener("result", this.speech);
+                            rec.start();
+                        }
                         this.properties.language = !this.properties.language;
                         while (this.elements.keysContainer.children.length > 0) this.elements.keysContainer.children[0].remove();
                         this.elements.keysContainer.appendChild(this._createKeys());
@@ -213,15 +242,52 @@ const Keyboard = {
                         input.setSelectionRange(this.properties.start, this.properties.end);
                     });
                     break;
+
                 case "sound":
-                    keyElement.classList.add("sound");
-                    keyElement.innerHTML = createIconHTML("volume_down");
-                    break;
-                case "mic":
-                    keyElement.classList.add("mic");
-                    keyElement.innerHTML = createIconHTML("mic");
+                    keyElement.innerHTML = createIconHTML("volume_up");
+                    // keyElement.classList.add("keyboard__key--empty");
+                    if (this.properties.sound)
+                        keyElement.classList.toggle('keyboard__key_mic');
+
+                    keyElement.addEventListener('click', () => {
+
+                        this.properties.sound = !this.properties.sound;
+                        keyElement.classList.toggle('keyboard__key_mic');
+                        input.focus();
+                    });
+
                     break;
 
+                case "mic":
+                    keyElement.innerHTML = createIconHTML("keyboard_voice");
+                    keyElement.classList.add("mic");
+                    if (this.properties.record) {
+                        keyElement.classList.toggle('keyboard__key_mic');
+                    }
+                    //recording
+                    keyElement.addEventListener('click', () => {
+                        if (this.properties.sound) {
+                            if (this.properties.language) window.speechSynthesis.speak(new SpeechSynthesisUtterance('record'));
+                            else window.speechSynthesis.speak(new SpeechSynthesisUtterance('запись'));
+                        }
+                        if (this.properties.language) rec.lang = "en-US";
+                        else rec.lang = "ru-RU";
+
+                        this.properties.record = !this.properties.record;
+                        document.querySelector('.mic').classList.toggle('keyboard__key_mic');
+
+                        if (this.properties.record) {
+                            rec.addEventListener("result", this.speech);
+                            rec.start();
+                        }
+                        else {
+                            rec.removeEventListener("result", this.speech);
+                            rec.stop();
+                        }
+
+                        input.focus();
+                    });
+                    break;
 
                 case "caps":
                     keyElement.classList.add( "keyboard__key--activatable", "caps");
@@ -435,11 +501,10 @@ const Keyboard = {
 
             fragment.appendChild(keyElement);
 
-            if (key === "backspace" || key[0] === "\\" || key === "enter" || key[0] === "/") {
+            if (key === "backspace" || key[0] === "\\" || key === "enter" || key[0] === "/" ) {
                 fragment.appendChild(document.createElement("br"));
             }
         });
-
         return fragment;
     },
 
@@ -458,6 +523,7 @@ const Keyboard = {
             }
         }
     },
+
     _toggleShift() {
         this.properties.shift = !this.properties.shift;
     },
