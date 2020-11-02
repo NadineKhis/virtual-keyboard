@@ -123,14 +123,14 @@ const Keyboard = {
             "tab", "q", "w", "e", "r", "t", "y", "u", "i", "o", "p", ["[", "{"], ["]", "}"], ["\\", "|"],
             "caps", "a", "s", "d", "f", "g", "h", "j", "k", "l", [";", ":"], ["'", "\""], "enter",
             "shift", "z", "x", "c", "v", "b", "n", "m", [",", "<"], [".", ">"], ["/", "?"],
-            "ctrl", "done", "en", "space", "mic", "sound", "empty", "left", "right"
+            "ctrl", "done", "en", "space", "mic", "sound",  "left", "right"
         ];
         const keyLayoutRu = [
             "ё", ["1", "!"], ["2", "\""], ["3", "№"], ["4", ";"], ["5", "%"], ["6", ":"], ["7", "?"], ["8", "*"], ["9", "("], ["0", ")"], ["-", "_"], ["=", "+"], "backspace",
             "tab", "й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х", "ъ", ["\\", "|"],
             "caps", "ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э", "enter",
             "shift", "я", "ч", "с", "м", "и", "т", "ь", "б", "ю", [".", ","],
-            "ctrl", "done", "ru", "space", "mic", "sound", "empty", "left", "right"
+            "ctrl", "done", "ru", "space", "mic", "sound",  "left", "right"
         ];
 
         // Creates HTML for an icon
@@ -150,7 +150,6 @@ const Keyboard = {
 
         keyLayout.forEach(key => {
             const keyElement = document.createElement("button");
-            const insertLineBreak = ["backspace", "]", "enter", "ctrl"].indexOf(key) !== -1;
 
             // Add attributes/classes
             keyElement.setAttribute("type", "button");
@@ -175,8 +174,9 @@ const Keyboard = {
                         this.elements.keys = this.elements.keysContainer.querySelectorAll(".keyboard__key");
                     });
                     break
+
                 case "tab":
-                    keyElement.classList.add("keyboard__key--wide", "tab");
+                    keyElement.classList.add("tab");
                     keyElement.innerHTML = createIconHTML('keyboard_tab');
 
                     keyElement.addEventListener("click", () => {
@@ -186,7 +186,7 @@ const Keyboard = {
                     break
 
                 case "backspace":
-                    keyElement.classList.add("keyboard__key--wide", "backspace");
+                    keyElement.classList.add("backspace");
                     keyElement.innerHTML = createIconHTML("backspace");
                     keyElement.addEventListener("click", () => {
                         input.focus();
@@ -214,9 +214,18 @@ const Keyboard = {
                         input.setSelectionRange(this.properties.start, this.properties.end);
                     });
                     break;
+                case "sound":
+                    keyElement.classList.add("sound");
+                    keyElement.innerHTML = createIconHTML("volume_down");
+                    break;
+                case "mic":
+                    keyElement.classList.add("mic");
+                    keyElement.innerHTML = createIconHTML("mic");
+                    break;
+
 
                 case "caps":
-                    keyElement.classList.add("keyboard__key--wide", "keyboard__key--activatable", "caps");
+                    keyElement.classList.add( "keyboard__key--activatable", "caps");
                     keyElement.innerHTML = createIconHTML("keyboard_capslock");
 
                     keyElement.addEventListener("click", () => {
@@ -253,7 +262,7 @@ const Keyboard = {
 
                 case "shift":
                     keyElement.innerHTML = createIconHTML("north");
-                    keyElement.classList.add("keyboard__key--verywide", "keyboard__key--activatable", "shift");
+                    keyElement.classList.add("keyboard__key--wide", "keyboard__key--activatable", "shift");
                     if (this.properties.shift === true) keyElement.classList.toggle("keyboard__key_shift");
 
                     keyElement.addEventListener('click', () => {
@@ -387,9 +396,6 @@ const Keyboard = {
 
                 default:
                     if (typeof key === 'string') {
-                        // if (key === 'c' || key === 'с') keyElement.classList.add("copy");
-                        // if (key === 'v' || key === 'м') keyElement.classList.add("paste");
-
                         if (this.properties.capsLock || this.properties.shift)
                             keyElement.textContent = key.toUpperCase();
                         else keyElement.textContent = key.toLowerCase();
@@ -430,7 +436,7 @@ const Keyboard = {
 
             fragment.appendChild(keyElement);
 
-            if (insertLineBreak) {
+            if (key === "backspace" || key[0] === "\\" || key === "enter" || key === "ctrl") {
                 fragment.appendChild(document.createElement("br"));
             }
         });

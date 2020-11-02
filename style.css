@@ -14,7 +14,7 @@
   bottom: 0;
   width: 100%;
   padding: 5px 0;
-  background: #004134;
+  background: #41002b;
   box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
   user-select: none;
   transition: bottom 0.4s;
@@ -79,4 +79,18 @@
 
 .keyboard__key--dark {
   background: rgba(0, 0, 0, 0.25);
+}
+
+.keyboard__key {
+  float: none;
+}
+
+body > div.keyboard > div > button:nth-child(29) {
+  margin-right: 10px;
+}
+
+@media screen and (max-width: 600px) {
+  .keyboard__key {
+    width: 5%;
+  }
 }
