@@ -7,9 +7,9 @@ rec.continuous = true;
 
 let keyPress = light => {
     light.animate([
-        {color: 'white', background: 'black'},
+        {color: 'white', background: 'rgba(0, 0, 0, 0.4)'},
         // { color: 'white', background: 'black' },
-        {color: 'white', background: 'black'}
+        {color: 'white', background: 'rgba(0, 0, 0, 0.4)'}
     ], {
         duration: 250
     })
@@ -105,18 +105,41 @@ const Keyboard = {
             });
             element.addEventListener('keydown', key => {
                 if (key.which === 37) {
+                    keyPress(document.querySelector('.left'));
                     this.properties.start--;
                     this.properties.end--;
                     if (this.properties.start < 0) this.properties.start = 0;
                     if (this.properties.end < 0) this.properties.end = 0;
                 }
                 if (key.which === 39) {
+                    keyPress(document.querySelector('.right'));
                     this.properties.start++;
                     this.properties.end++;
                     if (this.properties.start > this.properties.value.length) this.properties.start = this.properties.value.length;
                     if (this.properties.end > this.properties.value.length) this.properties.end = this.properties.value.length;
                 }
+                //ввод физического бекспейса
+                if (key.which === 8) {
+                    keyPress(document.querySelector('.backspace'));
+                    input.focus();
+                    input.click();
+                    let range = this.properties.end - this.properties.start;
+                    this.properties.end-=range;
 
+
+                    input.focus();
+                }
+                if (key.which === 20) {
+                    document.querySelector('.caps').classList.toggle("keyboard__key_shift");
+                    document.querySelector('.caps').classList.toggle("keyboard__key--active");
+                    this._toggleCapsLock();
+                }
+                if (key.which === 16 && !key.repeat) {
+                    document.querySelector('.shift').classList.toggle("keyboard__key_shift");
+                    document.querySelector('.caps').classList.toggle("keyboard__key--active");
+                    this.properties.shift = !this.properties.shift;
+                    this._toggleShift();
+                }
             })
         });
     },
