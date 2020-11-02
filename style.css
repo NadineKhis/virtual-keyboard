@@ -91,6 +91,13 @@ body > div.keyboard > div > button:nth-child(29) {
 
 @media screen and (max-width: 600px) {
   .keyboard__key {
-    width: 5%;
+    width: 5.8%;
+  }
+  .keyboard__key--wide {
+    width: 12%;
+  }
+  .keyboard__key--extra-wide {
+    width: 36%;
+    max-width: 500px;
   }
 }
