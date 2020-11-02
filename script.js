@@ -500,11 +500,15 @@ const Keyboard = {
             }
 
             fragment.appendChild(keyElement);
-
-            if (key === "backspace" || key[0] === "\\" || key === "enter" || key[0] === "/" ) {
+            // if (key === "enter") {
+            //     fragment.insertBefore(document.createElement("br", "enter"))
+            // }
+            if (key === "backspace" || key[0] === "\\" || key === "enter" || key[0] === "." ) {
                 fragment.appendChild(document.createElement("br"));
             }
+
         });
+
         return fragment;
     },
 
