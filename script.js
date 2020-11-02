@@ -133,7 +133,7 @@ const Keyboard = {
             "ё", ["1", "!"], ["2", "\""], ["3", "№"], ["4", ";"], ["5", "%"], ["6", ":"], ["7", "?"], ["8", "*"], ["9", "("], ["0", ")"], ["-", "_"], ["=", "+"], "backspace",
             "tab", "й", "ц", "у", "к", "е", "н", "г", "ш", "щ", "з", "х", "ъ", ["\\", "|"],
             "caps", "ф", "ы", "в", "а", "п", "р", "о", "л", "д", "ж", "э", "enter",
-            "shift", "я", "ч", "с", "м", "и", "т", "ь", "б", "ю", [".", ","],
+            "shift", "я", "ч", "с", "м", "и", "т", "ь", "б", "ю", [".", ","], ["/", "?"],
             "done", "ru", "space", "mic", "sound",  "left", "right"
         ];
 
@@ -503,7 +503,7 @@ const Keyboard = {
             // if (key === "enter") {
             //     fragment.insertBefore(document.createElement("br", "enter"))
             // }
-            if (key === "backspace" || key[0] === "\\" || key === "enter" || key[0] === "." ) {
+            if (key === "backspace" || key[0] === "\\" || key === "enter" || key[0] === "/" ) {
                 fragment.appendChild(document.createElement("br"));
             }
 
