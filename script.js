@@ -208,9 +208,20 @@ const Keyboard = {
                     keyElement.innerHTML = createIconHTML('keyboard_tab');
 
                     keyElement.addEventListener("click", () => {
-                        this.properties.value += '\t'
-                        cursorPos += 1
-                    })
+                        this.properties.value = this.properties.value.substring(0, this.properties.start)
+                            + '    '
+                            + this.properties.value.substring(this.properties.end, this.properties.value.length);
+                        this.properties.start++;
+                        this.properties.end++;
+                        this._triggerEvent("oninput");
+                        input.focus();
+
+                        let range = this.properties.end - this.properties.start;
+                        input.setSelectionRange(this.properties.end - range, this.properties.end - range);
+                        if (range > 0) {
+                            this.properties.end -= range;
+                        }
+                    });
                     break
 
                 case "backspace":
