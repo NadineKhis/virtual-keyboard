@@ -375,7 +375,7 @@ const Keyboard = {
 
                 case "shift":
                     keyElement.innerHTML = createIconHTML("north");
-                    keyElement.classList.add("keyboard__key--verywide","keyboard__key--activatable", "shift");
+                    keyElement.classList.add("keyboard__key--wide","keyboard__key--activatable", "shift");
                     if (this.properties.shift === true) keyElement.classList.toggle("keyboard__key_shift");
                     sound = new Audio("assets/sounds/button16.wav");
                     keyElement.addEventListener('click', () => {
