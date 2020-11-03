@@ -1,5 +1,5 @@
 let input = document.querySelector('.use-keyboard-input');
-
+let keyLayout;
 window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 let rec = new SpeechRecognition();
 rec.interimResults = true;
@@ -8,7 +8,6 @@ rec.continuous = true;
 let keyPress = light => {
     light.animate([
         {color: 'white', background: 'rgba(0, 0, 0, 0.4)'},
-        // { color: 'white', background: 'black' },
         {color: 'white', background: 'rgba(0, 0, 0, 0.4)'}
     ], {
         duration: 250
@@ -84,7 +83,7 @@ const Keyboard = {
                 if (key.which === 32) keyPress(document.querySelector('.space'));
                 if (key.which === 8) keyPress(document.querySelector('.backspace'));
                 if (key.which === 37) keyPress(document.querySelector('.left'));
-                // TODO: another func keys
+
 
                 for (let light of this.elements.keys) {
                     if (key.key.toLowerCase() === light.textContent.toLowerCase()) keyPress(light);
@@ -118,7 +117,8 @@ const Keyboard = {
                     if (this.properties.start > this.properties.value.length) this.properties.start = this.properties.value.length;
                     if (this.properties.end > this.properties.value.length) this.properties.end = this.properties.value.length;
                 }
-                //ввод физического бекспейса
+
+                // Backspace
                 if (key.which === 8) {
                     keyPress(document.querySelector('.backspace'));
                     input.focus();
@@ -136,7 +136,7 @@ const Keyboard = {
                 }
                 if (key.which === 16 && !key.repeat) {
                     document.querySelector('.shift').classList.toggle("keyboard__key_shift");
-                    document.querySelector('.caps').classList.toggle("keyboard__key--active");
+                    document.querySelector('.shift').classList.toggle("keyboard__key--active");
                     this.properties.shift = !this.properties.shift;
                     this._toggleShift();
                 }
@@ -166,7 +166,6 @@ const Keyboard = {
             return `<i class="material-icons">${icon_name}</i>`;
         };
 
-        let keyLayout;
         // check keys language
         if (this.properties.language) keyLayout = keyLayoutEn;
         else keyLayout = keyLayoutRu;
@@ -264,7 +263,7 @@ const Keyboard = {
                             sound.play()
                         }
                         input.focus();
-                        //удаление символов
+                        // deleting symbols
                         if (this.properties.start !== this.properties.end) {
                             this.properties.value = this.properties.value.substring(0, this.properties.start)
                                 + this.properties.value.substring(this.properties.end, this.properties.value.length);
@@ -376,69 +375,18 @@ const Keyboard = {
 
                 case "shift":
                     keyElement.innerHTML = createIconHTML("north");
-                    keyElement.classList.add("keyboard__key--wide", "keyboard__key--activatable", "shift");
+                    keyElement.classList.add("keyboard__key--verywide","keyboard__key--activatable", "shift");
                     if (this.properties.shift === true) keyElement.classList.toggle("keyboard__key_shift");
                     sound = new Audio("assets/sounds/button16.wav");
                     keyElement.addEventListener('click', () => {
                         if (this.properties.sound) {
                             sound.play()
                         }
-                        //change shift
                         this.properties.shift = !this.properties.shift;
                         keyElement.classList.toggle("keyboard__key--active");
+                        keyElement.classList.toggle("keyboard__key_shift");
                         input.focus();
-                        //change case
-                        for (let i = 0; i < keyLayout.length; i++) {
-                            if (typeof keyLayout[i] !== 'string') { //change of symbols
-                                keyLayout[i].reverse();
-                                for (const key of this.elements.keys) {
-                                    if (key.textContent === keyLayout[i][1]) {
-                                        key.textContent = keyLayout[i][0];
-                                    }
-                                }
-                            }
-                        }
-                        for (const key of this.elements.keys) { //change of letters
-                            if (key.childElementCount === 0 && key.textContent !== "en" && key.textContent !== "abc" && key.textContent !== "ABC"
-                                && key.textContent !== "ru" && key.textContent !== "абв" && key.textContent !== "АБВ"
-                                && key.textContent !== "ctrl") {
-                                if (this.properties.capsLock || this.properties.shift) key.textContent = key.textContent.toUpperCase();
-                                else key.textContent = key.textContent.toLowerCase();
-                                if (this.properties.capsLock && this.properties.shift) key.textContent = key.textContent.toLowerCase();
-                            }
-                        }
-                        document.querySelector('.right').addEventListener('click', (event) => {
-                            if (!this.properties.shift) {
-                                input.setSelectionRange(this.properties.start = this.properties.end, this.properties.end);
-                                input.focus();
-                            } else {
-                                // highlight right
-                                if (this.properties.direction === 'none') this.properties.direction = 'forward';
-                                if (this.properties.start <= this.properties.end && this.properties.direction === 'forward') {
-                                    this.properties.end++;
-                                    if (this.properties.end > this.properties.value.length) this.properties.end = this.properties.value.length;
-                                } else this.properties.start++;
-                                if (this.properties.start === this.properties.end) this.properties.direction = 'none';
-                                input.focus();
-                                input.setSelectionRange(this.properties.start, this.properties.end);
-                            }
-                        });
-                        document.querySelector('.left').addEventListener('click', () => {
-                            if (!this.properties.shift) {
-                                input.setSelectionRange(this.properties.start = this.properties.end, this.properties.end);
-                                input.focus();
-                            } else {
-                                // highlight left
-                                if (this.properties.direction === 'none') this.properties.direction = 'backward';
-                                if (this.properties.start <= this.properties.end && this.properties.direction === 'backward') {
-                                    this.properties.start--;
-                                    if (this.properties.start < 0) this.properties.start = 0;
-                                } else this.properties.end--;
-                                if (this.properties.start === this.properties.end) this.properties.direction = 'none';
-                                input.focus();
-                                input.setSelectionRange(this.properties.start, this.properties.end);
-                            }
-                        });
+                        this._toggleShift();
                     })
                     break;
 
@@ -548,7 +496,6 @@ const Keyboard = {
                         // write symbol on cursor pos
                         let symbol = key;
                         if (typeof symbol !== 'string') symbol = symbol[0];
-                        //правила регистра для капса и шифта
                         if (this.properties.capsLock || this.properties.shift) symbol = symbol.toUpperCase();
                         else symbol = symbol.toLowerCase();
                         if (this.properties.capsLock && this.properties.shift) symbol = symbol.toLowerCase();
@@ -600,6 +547,28 @@ const Keyboard = {
         }
     },
 
+    _toggleShift() {
+        for (let i = 0; i < keyLayout.length; i++) {
+            if (typeof keyLayout[i] !== 'string') { //change symbols
+                keyLayout[i].reverse();
+                for (const key of this.elements.keys) {
+                    if (key.textContent === keyLayout[i][1]) {
+                        key.textContent = keyLayout[i][0];
+                    }
+                }
+            }
+        }
+        for (const key of this.elements.keys) { //change letters
+            if (key.childElementCount === 0 && key.textContent!=="en" && key.textContent!=="abc" && key.textContent!=="ABC"
+                && key.textContent!=="ru" && key.textContent!=="абв" && key.textContent!=="АБВ"
+                && key.textContent!=="ctrl") {
+                if (this.properties.capsLock || this.properties.shift) key.textContent=key.textContent.toUpperCase();
+                else key.textContent=key.textContent.toLowerCase();
+                if (this.properties.capsLock && this.properties.shift) key.textContent=key.textContent.toLowerCase();
+            }
+
+        }
+    },
 
     open(initialValue, oninput, onclose) {
         this.properties.value = initialValue || "";
